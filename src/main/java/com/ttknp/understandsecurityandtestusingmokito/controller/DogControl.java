@@ -11,8 +11,8 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping(value = "/api")
 public class DogControl {
 
-    private DogService dogService;
-    private Logger log = LoggerFactory.getLogger(DogControl.class);
+    private final DogService dogService;
+    private final Logger log = LoggerFactory.getLogger(DogControl.class);
 
     public DogControl() {
         dogService = new DogService();
@@ -30,6 +30,11 @@ public class DogControl {
 
     @GetMapping(value = "/dogs/{id}")
     private ResponseEntity read(@PathVariable Long id) {
+        return ResponseEntity.status(202).body(dogService.getDog(id));
+    }
+
+    @GetMapping(value = "/dogs/by")
+    private ResponseEntity readWithParam(@RequestParam Long id) {
         return ResponseEntity.status(202).body(dogService.getDog(id));
     }
 

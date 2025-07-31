@@ -2,13 +2,12 @@ package com.ttknp.understandsecurityandtestusingmokito.service;
 
 
 import com.ttknp.understandsecurityandtestusingmokito.entity.Dog;
-
 import java.util.ArrayList;
 import java.util.List;
 
 public class DogService {
 
-    private List<Dog> dogs;
+    private final List<Dog> dogs;
 
     public DogService() {
         dogs = new ArrayList<>();
@@ -36,14 +35,13 @@ public class DogService {
     public Boolean editDog(Dog dog, long id) {
         boolean isFoundTheDog = false;
         // *** Should know
-        // this loop works for changing properties of dog
-        // *** it means dogIsMemberOfDogs changes dogs change too
-        for (Dog dogIsMemberOfDogs : dogs) {
-            if (dogIsMemberOfDogs.getId() == id) {
-                dogIsMemberOfDogs.setName(dog.getName());
-                dogIsMemberOfDogs.setGender(dog.getGender());
-                dogIsMemberOfDogs.setPrice(dog.getPrice());
-                dogIsMemberOfDogs.setType(dog.getType());
+        // this loop works for changing properties of dog *** it means the memberDog changes dogs change too
+        for (Dog memberDog : dogs) {
+            if (memberDog.getId() == id) {
+                memberDog.setName(dog.getName());
+                memberDog.setGender(dog.getGender());
+                memberDog.setPrice(dog.getPrice());
+                memberDog.setType(dog.getType());
                 isFoundTheDog = true;
             }
         }

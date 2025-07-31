@@ -11,6 +11,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
@@ -20,26 +21,28 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 // ** Test a Secured Spring Web MVC Endpoint with MockMvc
 @Import(SecurityConfig.class) // For using security config
+@WebMvcTest(controllers = DogControl.class)
 /**
-   MockMvc to perform integration testing of REST controllers.
-   The @WebMvcTest annotation auto configure MockMvc instance as well.
-   It disables full auto configuration and instead applies only configuration relevant to MVC tests.
-   Using DogControl.class as the parameter, we are asking to initialize only one web controller
+ Note should once for authenticate. roles or authorities
+ @WithMockUser(username="admin",password = "12345",authorities={"ADMIN"})  *** Note username , password it's optional
 */
-@WebMvcTest(DogControl.class) // **
-// @WithMockUser(username="admin",password = "12345",authorities={"ADMIN"}) // *** Note username , password it's optional
-// ** Note should once for authenticate. roles or authorities
-// ** And username , password it's optional
 @WithMockUser(username = "admin", password = "12345", authorities = {"write", "read"})
-public class TestDogControlMergOnClass {
-
+public class TestDogControlMergeOnClass {
+    /**
+     MockMvc to perform integration testing of REST controllers.
+     The @WebMvcTest annotation auto configure MockMvc instance as well.
+     It disables full auto configuration and instead applies only configuration relevant to MVC tests.
+     Using DogControl.class as the parameter, we are asking to initialize only one web controller
+    */
     @Autowired
     private MockMvc mvc;
+
 
     @Test
     @WithMockUser(authorities = {"read"}) // Also write can access this
     void shouldReturn403Forbidden() throws Exception {
-        mvc.perform(get("/api/dogs"))
+        MockHttpServletRequestBuilder getAllDogs = MockMvcRequestBuilders.get("/api/dogs");
+        mvc.perform(getAllDogs)
                 .andExpect(status().isForbidden());
     }
 
@@ -53,7 +56,7 @@ public class TestDogControlMergOnClass {
                 .andExpect(MockMvcResultMatchers.status().isAccepted())
                 .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.[0].id").value(1001));
-                /* Why [0] just notice
+                /*  Why [0] just notice
                     [{"id":1001,"name":"Harry","type":"Alaskan Malamute","gender":"Male","price":12000.0},{"id":1002,"name":"Jia Ant","type":"Basset Hound","gender":"Male","price":19000.0},{"id":1003,"name":"Harry","type":"Beagle","gender":"Female","price":22000.0}]
                 */
     }
@@ -67,6 +70,20 @@ public class TestDogControlMergOnClass {
                 .andExpect(status().isAccepted())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
                 // ** MockMvcResultMatchers.jsonPath(..) it returns following your api
+                .andExpect(jsonPath("$.id").value(1001)); // ** $.<map name key of body> then take a expected value
+
+    }
+
+    @Test
+    void shouldReturn202AcceptedOnHttpGetHasParam2() throws Exception {
+        mvc.perform(get("/api/dogs/by")
+                         // mock param as by?id=1001
+                        .param("id","1001")
+                        .accept(MediaType.APPLICATION_JSON_VALUE)
+                        .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andDo(print()) // ** importance. behind the sense it prepares the real response
+                .andExpect(status().isAccepted())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(jsonPath("$.id").value(1001)); // ** $.<map name key of body> then take a expected value
 
     }

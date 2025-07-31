@@ -1,17 +1,22 @@
 package com.ttknp.understandsecurityandtestusingmokito.entity;
 
 public class Dog {
+
     private Long id;
     private String name;
     private String type;
     private String gender;
     private Double price;
+
     public Dog(Long id, String name, String type, String gender, Double price) {
         this.id = id;
         this.name = name;
         this.type = type;
         this.gender = gender;
         this.price = price;
+    }
+
+    public Dog() {
     }
 
     public Long getId() {
